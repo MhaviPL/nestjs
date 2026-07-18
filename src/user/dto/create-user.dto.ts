@@ -1,3 +1,4 @@
 export class CreateUseDTO {
-    name: string
+    name!: string
+    email!: string
 }
