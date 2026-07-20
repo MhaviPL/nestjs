@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { LoggerService } from './user.logger';
 import { CreateUseDTO } from './dto/create-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
@@ -21,17 +21,27 @@ export class UserService {
         findAllUsers(name: string = ''){
             this.logger.log('Finding all users')
 
-            return this.users.filter((user) =>
+            const users = this.users.filter((user) =>
                 user.name.toLowerCase().includes(name.toLowerCase())
             )
+            
+            if (users.length === 0) {
+                throw new NotFoundException('User Not Found')
+            }
+
+            return users
         }
 
         findUserById(id:number){
             this.logger.log(`Finding User with id -> ${id}`)
 
-            return this.users.find((user) => 
-                user.id === id
-            ) ?? null
+            const user = this.users.find((user) => user.id === id) ?? null
+
+            if (!user) {
+                throw new NotFoundException('User Not Found')
+            }
+
+            return user
         }
 
         createUser(UserDTO: CreateUseDTO){
@@ -46,8 +56,11 @@ export class UserService {
         updateUser(id: number, UserDTO: UpdateUserDTO){
             this.logger.log(`Updating User with id -> ${id}`)
 
-            const index = this.users.findIndex((user) => user.id === id)
-            if (index === -1) return null
+            const index = this.users.findIndex((user) => user.id == id)
+            
+            if (index === -1) {
+                throw new NotFoundException('User Not Found')
+            } 
 
             this.users[index] = { ...this.users[index], ...UserDTO }
 
@@ -57,8 +70,11 @@ export class UserService {
         deleteUser(id: number){
             this.logger.log(`Deleting User with id -> ${id}`)
 
-            const index = this.users.findIndex((user) => user.id === id)
-            if (index === -1) return null
+            const index = this.users.findIndex((user) => user.id == id)
+            
+            if (index === -1) {
+                throw new NotFoundException('User Not Found')
+            } 
 
             const deleted = this.users.splice(index, 1)
 
