@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CreateUseDTO } from './dto/create-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
 import { UserService } from './user.service';
+import { RoleGuard } from 'src/guards/role.guard';
 
 @Controller('user')
+//@UseGuards()
 export class UserController {
     constructor(private readonly userService: UserService ) {}
     @Get() // GET /user?name=Name
@@ -12,7 +14,7 @@ export class UserController {
     }
 
     @Get(':id') // GET /user/:id
-    getUserById(@Param('id') id: number): unknown{
+    getUserById(@Param('id', ParseIntPipe) id: number): unknown{
         return this.userService.findUserById(id)
     }
 
@@ -22,12 +24,13 @@ export class UserController {
     }
 
     @Put(':id') // PUT /user/:id
-    updateUser(@Param('id') id:number, @Body() updateUserDTO: UpdateUserDTO): unknown{
+    updateUser(@Param('id', ParseIntPipe) id:number, @Body() updateUserDTO: UpdateUserDTO): unknown{
         return this.userService.updateUser(id, updateUserDTO)
     }
 
     @Delete(':id') // DELETE /user/:id
-    deleteUser(@Param('id') id:number): unknown {
+    @UseGuards(RoleGuard)
+    deleteUser(@Param('id', ParseIntPipe) id:number): unknown {
         return this.userService.deleteUser(id)
     }
 }
